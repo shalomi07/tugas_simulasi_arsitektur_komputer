@@ -4,7 +4,7 @@
 typedef enum {t1, t2, t3, t4, t5, t6} state_t;
 
 state_t initial_state = t1;
-state_t state, next_state, current_state;
+state_t state, current_state;
 
 uint8_t pc = 0;
 uint8_t mar = 0;
@@ -29,11 +29,35 @@ uint8_t ram[16] = {
     0x00, 
     0x00, 
     0x00
+    // LDA = 0x0
+    // ADD = 0x1
+    // SUB = 0x2
 };
 
 int Ep, Lm, Cp, Ce, Li, Ei, La, Lb, Eu, Lo, Ea, Su;
 
-state_t state_machine (current_state){
+void LDA(void){
+
+}
+void ADD(void){
+
+}
+void SUB(void){
+
+}
+void OUT(){}
+
+// HLT berakhir di t3
+
+uint8_t decode(void) {
+    return (ir >> 4) & 0x0F;
+}
+
+state_t state_machine (state_t current_state){
+    // jika terima HLT, sampai t3 saja
+    // jika terima OUT, sampai t4 saja
+    uint8_t opcode = decode();
+
     switch (current_state) {
         case t1:
             Ep = 1;
@@ -58,6 +82,13 @@ state_t state_machine (current_state){
             break;
 
         case t3:
+            if (opcode == 0xF) {
+                printf("Instruksi : HLT\n");
+                printf("\n======== PROGRAM SELESAI ========\n");
+                printf("Hasil akhir A = %d\n", A);
+                state = t1; // kembali ke state awal
+                break;
+            }
             Ce = 0;
             Li = 0;
             ir = ram[mar];
@@ -68,21 +99,44 @@ state_t state_machine (current_state){
 
             state = t4;
             break;
+
         case t4:
+            if (opcode == 0x0){
+                LDA();
+            } else if (opcode == 0x1){
+                ADD();
+            } else if (opcode == 0x2){
+                SUB();
+            } else if (opcode == 0xE){
+                OUT();
+            }
 
         case t5:
+             if (opcode == 0x0){
+                LDA();
+            } else if (opcode == 0x1){
+                ADD();
+            } else if (opcode == 0x2){
+                SUB();
+            } else if (opcode == 0xE){
+                OUT();
+            }
+
         case t6:
+             if (opcode == 0x0){
+                LDA();
+            } else if (opcode == 0x1){
+                ADD();
+            } else if (opcode == 0x2){
+                SUB();
+            } else if (opcode == 0xE){
+                OUT();
+            }
         default:
 
     }
-    return next_state;
+    return state;
 }
-
-void LDA(void){}
-void ADD(void){}
-void SUB(void){}
-void OUT(void){}
-// HLT berakhir di t3
 
 void simulate_state(state_t state){
     while (1){
