@@ -36,18 +36,6 @@ uint8_t ram[16] = {
 
 int Ep, Lm, Cp, Ce, Li, Ei, La, Lb, Eu, Lo, Ea, Su;
 
-void LDA(void){
-
-}
-void ADD(void){
-
-}
-void SUB(void){
-
-}
-void OUT(){}
-
-// HLT berakhir di t3
 
 uint8_t decode(void) {
     return (ir >> 4) & 0x0F;
@@ -68,7 +56,6 @@ state_t state_machine (state_t current_state){
             printf("     Ep = 1\n");
             printf("     Lm = 0\n");
 
-            state = t2;
             break;
 
         case t2:
@@ -78,7 +65,6 @@ state_t state_machine (state_t current_state){
             printf("T2 : PC + 1\n");
             printf("     Cp = 1\n");
 
-            state = t3;
             break;
 
         case t3:
@@ -97,45 +83,74 @@ state_t state_machine (state_t current_state){
             printf("     Ce = 0\n");
             printf("     Li = 0\n");
 
-            state = t4;
             break;
 
         case t4:
             if (opcode == 0x0){
-                LDA();
+                Lm = 0;
+                Ei = 0;
+                mar = ir & 0x0F;
+                break;
             } else if (opcode == 0x1){
-                ADD();
+                Lm = 0;
+                Ei = 0;
+                mar = ir & 0x0F;
+                break;
             } else if (opcode == 0x2){
-                SUB();
+                Lm = 0;
+                Ei = 0;
+                mar = ir & 0x0F;
+                break;
             } else if (opcode == 0xE){
-                OUT();
+                Lo = 0;
+                printf("Output = %d\n", A);
+                break;
             }
 
         case t5:
              if (opcode == 0x0){
-                LDA();
+                Ce = 0;
+                La = 0;
+                A = ram[mar];
+                break;
             } else if (opcode == 0x1){
-                ADD();
+                Ce = 0;
+                Lb = 0;
+                B = ram[mar];
+                break;
             } else if (opcode == 0x2){
-                SUB();
-            } else if (opcode == 0xE){
-                OUT();
+                Ce = 0;
+                Lb = 0;
+                B = ram[mar];
+                break;
             }
 
         case t6:
              if (opcode == 0x0){
                 LDA();
             } else if (opcode == 0x1){
-                ADD();
+                La = 0;
+                Eu = 1;
+                A = A + B;
+                break;
             } else if (opcode == 0x2){
-                SUB();
-            } else if (opcode == 0xE){
-                OUT();
+                La = 0;
+                Eu = 1;
+                Su = 1;
+                A = A - B;
+                break;
             }
         default:
+            printf("Instruksi tidak dikenal.\n");
+            break;
+
 
     }
-    return state;
+    if (opcode == 0xF || opcode == 0xE || current_state == t6 || current_state == t3 || current_state == t4) {
+        return t1;
+    } else {
+        return current_state + 1;
+    }
 }
 
 void simulate_state(state_t state){
